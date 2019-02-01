@@ -17,11 +17,12 @@ public class ScoreManager : Singleton<ScoreManager> {
     public GameObject scoreItemPrefab;
 
     [Space(20)]
-    public string serverSetURL = "http://my-leaderboard-site.com/set";
-    public string serverGetURL = "http://my-leaderboard-site.com/get";
+    public string serverSetURL = "http://api.geeksesi.tk/set";
+    public string serverGetURL = "http://api.geeksesi.tk/get";
     public string serverToken = "fd40c20e30d7c258f6bacfe892a5c48a3f7b954d";
     public string hashKey = "2fa4231a009e1482";
     public string hashIV = "a874a935c9680esd";
+    public bool RepeatMode;
 
     int _score = 0;
     public int score
@@ -117,7 +118,12 @@ public class LeaderboardOnlineRequest
     {
         // Create a form object for sending score data to the server
         WWWForm form = new WWWForm();
+        if(ScoreManager.Instance.RepeatMode){
 
+        form.AddField("repeat","on");
+        }else{
+        form.AddField("repeat","off");
+        }
         form.AddField("token", token);
         form.AddField("name", name);
         form.AddField("score", score);
@@ -174,9 +180,13 @@ public class LeaderboardOnlineResponse
 
     public IEnumerator IEReceiveResponse()
     {
+        string repeat = "";
+        if(!ScoreManager.Instance.RepeatMode){
+        repeat = "&repeat=off";
+        }
         // Create a download object
         UnityWebRequest webRequest = UnityWebRequest.Get(
-            string.Format("{0}?token={1}&interval=all&order=DESC", ScoreManager.Instance.serverGetURL, ScoreManager.Instance.serverToken)
+            string.Format("{0}?token={1}&interval=all&order=DESC"+repeat, ScoreManager.Instance.serverGetURL, ScoreManager.Instance.serverToken)
         );
 
         // Set headers
